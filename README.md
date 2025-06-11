@@ -63,7 +63,8 @@ python sql_query_visualizer.py -f query.sql -d postgres -o postgres_diagram
 ### Enhanced Information
 - Table/CTE names and aliases
 - Schema information where available
-- Key columns (first few displayed)
+- **Join columns prominently displayed (NEW!)** 🔑
+- **Accurate join type detection and visualization (NEW!)** 
 - Join conditions and cardinality estimates
 - CTE hierarchy levels
 - Complexity metrics and analysis
