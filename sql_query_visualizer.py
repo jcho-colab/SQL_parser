@@ -300,15 +300,24 @@ class SQLQueryParser:
         with_clauses = parsed_query.find_all(exp.With)
         for with_clause in with_clauses:
             for cte in with_clause.expressions:
-                if hasattr(cte, 'alias') and cte.alias == cte_name:
+                if hasattr(cte, 'alias') and str(cte.alias) == cte_name:
                     # Find all table/CTE references in this CTE's query
                     tables = cte.this.find_all(exp.Table)
                     for table in tables:
                         table_name = str(table.name) if hasattr(table, 'name') else str(table)
                         if table_name != cte_name:  # Don't include self-reference
                             dependencies.append(table_name)
+                    
+                    # Also find any CTE references
+                    identifiers = cte.this.find_all(exp.Identifier)
+                    for identifier in identifiers:
+                        identifier_name = str(identifier.name) if hasattr(identifier, 'name') else str(identifier)
+                        # Check if this identifier is a known CTE
+                        if identifier_name in self.nodes and self.nodes[identifier_name].node_type == NodeType.CTE:
+                            if identifier_name != cte_name and identifier_name not in dependencies:
+                                dependencies.append(identifier_name)
         
-        return dependencies
+        return list(set(dependencies))  # Remove duplicates
 
 
 class DiagramGenerator:
