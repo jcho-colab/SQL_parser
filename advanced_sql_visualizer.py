@@ -327,14 +327,18 @@ class AdvancedSQLQueryParser:
         if not expr:
             return None
             
-        if hasattr(expr, 'name'):
-            return str(expr.name)
-        elif hasattr(expr, 'this') and hasattr(expr.this, 'name'):
-            return str(expr.this.name)
-        elif hasattr(expr, 'alias'):
-            return str(expr.alias)
-        
-        return str(expr) if expr else None
+        try:
+            if hasattr(expr, 'name'):
+                return str(expr.name)
+            elif hasattr(expr, 'this') and hasattr(expr.this, 'name'):
+                return str(expr.this.name)
+            elif hasattr(expr, 'alias'):
+                return str(expr.alias)
+            
+            expr_str = str(expr) if expr else None
+            return expr_str
+        except Exception:
+            return None
     
     def _extract_join_keys_comprehensive(self, join_condition) -> List[Tuple[str, str]]:
         """Enhanced join key extraction"""
