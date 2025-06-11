@@ -149,9 +149,14 @@ LEFT JOIN (...) regional_stats ON ...;
 - E-commerce analytics, financial portfolio, healthcare
 - Complete feature demonstration
 
-### 6. Join Comparison Demo (`join_comparison_demo.py`)
-- Shows before/after comparison of join detection
-- Demonstrates improvements in join visualization
+### 7. **NEW: Query Structure Visualizer (`query_structure_visualizer.py`)** 🌟
+- **Hierarchical SQL query analysis** - Exactly what you requested!
+- **Isolates all SELECT statements** and shows their relationships
+- **Displays query encapsulation** - shows which statements contain others
+- **Left-to-right progression** from isolated → grouped → nested structures
+- **Proper WITH AS handling** - shows CTE containers and contents
+- **Nested SELECT detection** - identifies subqueries at all levels
+- **Perfect for understanding complex query architecture**
 
 ## 📈 Supported SQL Constructs
 
