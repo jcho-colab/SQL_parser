@@ -115,19 +115,32 @@ class RobustJoinParser:
     
     def _split_join_clauses(self, sql: str) -> List[str]:
         """Split SQL into individual join clauses"""
+        print(f"DEBUG: Full SQL after cleaning: {sql}")  # Debug
+        
         # Find the FROM clause and everything after it
         from_match = re.search(r'FROM\s+[\w\.\s]+', sql, re.IGNORECASE)
         if not from_match:
+            print("DEBUG: No FROM clause found")  # Debug
             return []
         
         # Get the part after FROM
         from_end = from_match.end()
         after_from = sql[from_end:]
+        print(f"DEBUG: After FROM: {after_from}")  # Debug
         
         # Split by JOIN keywords, keeping the keyword with the clause
         join_pattern = r'((?:INNER\s+|LEFT\s+(?:OUTER\s+)?|RIGHT\s+(?:OUTER\s+)?|FULL\s+(?:OUTER\s+)?|CROSS\s+)?JOIN\s+[^WHERE|GROUP|ORDER|HAVING|LIMIT]+?)(?=\s+(?:INNER\s+|LEFT\s+|RIGHT\s+|FULL\s+|CROSS\s+)?JOIN|WHERE|GROUP\s+BY|ORDER\s+BY|HAVING|LIMIT|$)'
         
         join_matches = re.findall(join_pattern, after_from, re.IGNORECASE | re.DOTALL)
+        print(f"DEBUG: Found {len(join_matches)} join matches: {join_matches}")  # Debug
+        
+        # If the complex pattern doesn't work, try a simpler approach
+        if not join_matches:
+            print("DEBUG: Trying simpler pattern...")  # Debug
+            # Look for individual JOIN clauses
+            simple_pattern = r'((?:INNER\s+|LEFT\s+|RIGHT\s+|FULL\s+|CROSS\s+)?JOIN\s+\w+(?:\s+\w+)?\s+ON\s+[^JOIN]+?)(?=\s*(?:INNER\s+|LEFT\s+|RIGHT\s+|FULL\s+|CROSS\s+)?JOIN|WHERE|$)'
+            join_matches = re.findall(simple_pattern, after_from, re.IGNORECASE | re.DOTALL)
+            print(f"DEBUG: Simple pattern found {len(join_matches)} matches: {join_matches}")  # Debug
         
         return [match.strip() for match in join_matches if match.strip()]
     
