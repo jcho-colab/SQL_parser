@@ -433,40 +433,53 @@ class AdvancedSQLQueryParser:
     
     def _extract_column_name_comprehensive(self, expression) -> Optional[str]:
         """Enhanced column name extraction"""
-        # Handle aliased expressions
-        if hasattr(expression, 'alias') and expression.alias:
-            alias = str(expression.alias)
-            if len(alias) < 30:  # Reasonable length
-                return alias
-        
-        # Handle simple column references
-        if hasattr(expression, 'name'):
-            name = str(expression.name)
-            if len(name) < 30:
-                return name
-        
-        # Handle qualified column references (table.column)
-        if hasattr(expression, 'this') and hasattr(expression.this, 'name'):
-            name = str(expression.this.name)
-            if len(name) < 30:
-                return name
-        
-        # Handle function calls - show function name
-        if hasattr(expression, 'sql_name'):
-            func_name = str(expression.sql_name())
-            if len(func_name) < 20:
-                return f"{func_name}(...)"
-        
-        # Handle star expressions
-        expr_str = str(expression)
-        if expr_str in ['*', 'COUNT(*)', 'COUNT(1)']:
-            return expr_str
-        
-        # For complex expressions, create a simplified representation
-        if len(expr_str) < 40:
-            return expr_str
-        
-        return None
+        try:
+            # Handle aliased expressions
+            if hasattr(expression, 'alias') and expression.alias:
+                alias = str(expression.alias)
+                if len(alias) < 30:  # Reasonable length
+                    return alias
+            
+            # Handle simple column references
+            if hasattr(expression, 'name'):
+                name = str(expression.name)
+                if len(name) < 30:
+                    return name
+            
+            # Handle qualified column references (table.column)
+            if hasattr(expression, 'this') and hasattr(expression.this, 'name'):
+                name = str(expression.this.name)
+                if len(name) < 30:
+                    return name
+            
+            # Handle function calls - show function name
+            if hasattr(expression, 'sql_name') and callable(expression.sql_name):
+                try:
+                    func_name = str(expression.sql_name())
+                    if len(func_name) < 20:
+                        return f"{func_name}(...)"
+                except:
+                    pass
+            
+            # Handle star expressions
+            expr_str = str(expression)
+            if expr_str in ['*', 'COUNT(*)', 'COUNT(1)']:
+                return expr_str
+            
+            # For complex expressions, create a simplified representation
+            if len(expr_str) < 40:
+                return expr_str
+            
+            return None
+        except Exception:
+            # Fallback for any parsing issues
+            try:
+                expr_str = str(expression)
+                if len(expr_str) < 30:
+                    return expr_str
+            except:
+                pass
+            return None
     
     def _analyze_query_complexity(self):
         """Analyze overall query complexity"""
