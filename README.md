@@ -127,15 +127,27 @@ LEFT JOIN (...) regional_stats ON ...;
 - Enhanced styling and layout
 - Verbose mode for detailed analysis
 
-### 3. Test Suite (`test_visualizer.py`)
+### 3. **NEW: Join-Focused Visualizer (`final_join_visualizer.py`)** ⭐
+- **Specialized join detection and visualization**
+- **Shows ONLY join-relevant columns in tables**
+- **Accurate join type identification (INNER, LEFT, RIGHT, FULL, CROSS)**
+- **Detailed join condition analysis**
+- **Color-coded join relationships**
+- **Perfect for understanding table relationships and join structure**
+
+### 4. Test Suite (`test_visualizer.py`)
 - Comprehensive test cases
 - Various SQL pattern demonstrations
 - Automated testing of different query types
 
-### 4. Comprehensive Demo (`demo_comprehensive.py`)
+### 5. Comprehensive Demo (`demo_comprehensive.py`)
 - Real-world example queries from different domains
 - E-commerce analytics, financial portfolio, healthcare
 - Complete feature demonstration
+
+### 6. Join Comparison Demo (`join_comparison_demo.py`)
+- Shows before/after comparison of join detection
+- Demonstrates improvements in join visualization
 
 ## 📈 Supported SQL Constructs
 
