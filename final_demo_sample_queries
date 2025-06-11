@@ -1,0 +1,26 @@
+// SQL Query Structure Progression
+digraph {
+	rankdir=LR
+	node [fontname=Arial shape=box style=filled]
+	edge [fontname=Arial fontsize=9]
+	graph [fontname=Arial nodesep=1.5 ranksep=2.5 splines=ortho]
+	fontsize=14 label="Query Structure Progression\n9 Structures, 4 Levels" labelloc=top
+	{
+		rank=same
+		main_0 [label="📦 Main Query Block\nLevel 0" fillcolor="#E8F5E8"]
+	}
+	{
+		rank=same
+		main_select_0 [label="🎯 Main SELECT\nLevel 2\n📋 product_performance, customers, customer_metrics (+9)\n🔗 c.customer_id = o.customer_id\n   (+16 more)" fillcolor="#E3F2FD"]
+	}
+	{
+		rank=same
+		subquery_0 [label="📊 Subquery 1\nLevel 3" fillcolor="#F3E5F5"]
+		subquery_1 [label="📊 Subquery 2\nLevel 3" fillcolor="#F3E5F5"]
+		subquery_2 [label="📊 Subquery 3\nLevel 3\n📋 customer_metrics" fillcolor="#F3E5F5"]
+		subquery_3 [label="📊 Subquery 4\nLevel 3" fillcolor="#F3E5F5"]
+		subquery_4 [label="📊 Subquery 5\nLevel 3" fillcolor="#F3E5F5"]
+		subquery_5 [label="📊 Subquery 6\nLevel 3" fillcolor="#F3E5F5"]
+		subquery_6 [label="📊 Subquery 7\nLevel 3\n📋 o" fillcolor="#F3E5F5"]
+	}
+}
