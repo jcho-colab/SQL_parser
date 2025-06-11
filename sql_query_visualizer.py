@@ -187,29 +187,8 @@ class SQLQueryParser:
     
     def _build_relationships(self, parsed_query):
         """Build relationships between nodes"""
-        # Find joins
-        joins = parsed_query.find_all(exp.Join)
-        
-        for join in joins:
-            join_type = self._get_join_type(join)
-            
-            # Extract join conditions
-            if hasattr(join, 'on') and join.on:
-                join_keys = self._extract_join_keys(join.on)
-                
-                # Get table names involved in join
-                source_table = self._get_table_from_join(join, 'left')
-                target_table = self._get_table_from_join(join, 'right')
-                
-                if source_table and target_table:
-                    edge = QueryEdge(
-                        source=source_table,
-                        target=target_table,
-                        join_type=join_type,
-                        join_keys=join_keys,
-                        edge_type="join"
-                    )
-                    self.edges.append(edge)
+        # Find all FROM and JOIN clauses to build comprehensive relationships
+        self._analyze_query_relationships(parsed_query)
         
         # Build CTE dependencies
         for cte_name in self.nodes:
@@ -217,7 +196,7 @@ class SQLQueryParser:
                 # Find tables/CTEs referenced in this CTE
                 dependencies = self._find_cte_dependencies(parsed_query, cte_name)
                 for dep in dependencies:
-                    if dep in self.nodes:
+                    if dep in self.nodes and dep != cte_name:
                         edge = QueryEdge(
                             source=dep,
                             target=cte_name,
