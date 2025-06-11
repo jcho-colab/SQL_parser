@@ -215,44 +215,63 @@ class SimpleJoinParser:
                         self.tables[table_key].join_columns.append(col)
     
     def _extract_with_regex(self, sql: str):
-        """Fallback regex-based extraction"""
-        # Clean up SQL
-        sql = re.sub(r'\s+', ' ', sql.strip())
+        """Regex-based extraction for reliable join detection"""
+        # Clean up SQL - remove comments and normalize whitespace
+        sql = re.sub(r'--.*$', '', sql, flags=re.MULTILINE)  # Remove comments
+        sql = re.sub(r'\s+', ' ', sql.strip())  # Normalize whitespace
         
-        # Extract FROM clause
-        from_match = re.search(r'FROM\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?', sql, re.IGNORECASE)
+        print(f"Processing SQL: {sql[:100]}...")  # Debug
+        
+        # Extract FROM clause with table and alias
+        from_pattern = r'FROM\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?'
+        from_match = re.search(from_pattern, sql, re.IGNORECASE)
+        
         if from_match:
             table_name = from_match.group(1)
             alias = from_match.group(2) or from_match.group(3) or table_name
+            
+            print(f"Found FROM table: {table_name} as {alias}")  # Debug
+            
             self.tables[alias] = Table(name=table_name, alias=alias)
             if alias != table_name:
                 self.table_aliases[alias] = table_name
         
-        # Extract JOINs
-        join_pattern = r'(INNER\s+JOIN|LEFT\s+JOIN|RIGHT\s+JOIN|FULL\s+JOIN|JOIN)\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?\s+ON\s+([^JOIN]+?)(?=\s+(?:INNER|LEFT|RIGHT|FULL|JOIN|WHERE|GROUP|ORDER|HAVING|$))'
+        # Extract JOINs - improved pattern
+        join_pattern = r'(INNER\s+JOIN|LEFT\s+(?:OUTER\s+)?JOIN|RIGHT\s+(?:OUTER\s+)?JOIN|FULL\s+(?:OUTER\s+)?JOIN|CROSS\s+JOIN|JOIN)\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?\s+ON\s+([^WHERE|GROUP|ORDER|HAVING|INNER|LEFT|RIGHT|FULL|CROSS|JOIN]+)'
         
         joins = re.findall(join_pattern, sql, re.IGNORECASE)
         
-        prev_table = list(self.tables.keys())[0] if self.tables else None
+        print(f"Found {len(joins)} joins")  # Debug
+        
+        # Process joins in order
+        table_order = [list(self.tables.keys())[0]] if self.tables else []
         
         for join_type_str, table_name, alias1, alias2, condition in joins:
             alias = alias1 or alias2 or table_name
             
-            # Add table
-            self.tables[alias] = Table(name=table_name, alias=alias)
-            if alias != table_name:
-                self.table_aliases[alias] = table_name
+            print(f"Processing join: {join_type_str} {table_name} as {alias} ON {condition}")  # Debug
+            
+            # Add table if not exists
+            if alias not in self.tables:
+                self.tables[alias] = Table(name=table_name, alias=alias)
+                if alias != table_name:
+                    self.table_aliases[alias] = table_name
             
             # Determine join type
             join_type = JoinType.INNER
-            if 'LEFT' in join_type_str.upper():
+            join_upper = join_type_str.upper()
+            if 'LEFT' in join_upper:
                 join_type = JoinType.LEFT
-            elif 'RIGHT' in join_type_str.upper():
+            elif 'RIGHT' in join_upper:
                 join_type = JoinType.RIGHT
-            elif 'FULL' in join_type_str.upper():
+            elif 'FULL' in join_upper:
                 join_type = JoinType.FULL
+            elif 'CROSS' in join_upper:
+                join_type = JoinType.CROSS
             
-            # Create join
+            # Find the previous table to join with
+            prev_table = table_order[-1] if table_order else None
+            
             if prev_table:
                 join_obj = Join(
                     left_table=prev_table,
@@ -262,10 +281,17 @@ class SimpleJoinParser:
                 )
                 self.joins.append(join_obj)
                 
+                print(f"Created join: {prev_table} -> {alias}")  # Debug
+                
                 # Extract join columns
-                self._extract_join_columns_from_condition(condition, prev_table, alias)
+                self._extract_join_columns_from_condition(condition.strip(), prev_table, alias)
             
-            prev_table = alias
+            # Add current table to order
+            if alias not in table_order:
+                table_order.append(alias)
+        
+        print(f"Final tables: {list(self.tables.keys())}")  # Debug
+        print(f"Final joins: {len(self.joins)}")  # Debug
     
     def _extract_join_columns_from_condition(self, condition: str, left_table: str, right_table: str):
         """Extract join columns from condition string"""
