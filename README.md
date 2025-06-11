@@ -1,52 +1,90 @@
 # SQL Query Visualizer
 
-A Python tool to parse complex SQL queries and generate static diagrams showing lineage, relationships, and data flow.
+A comprehensive Python tool to parse complex SQL queries and generate static diagrams showing lineage, relationships, and data flow. This tool helps you understand how complex SQL queries are structured, how tables are connected, and how data flows through CTEs and subqueries.
 
-## Features
+## 🎯 Key Features
 
-- **Complex SQL Parsing**: Handles nested CTEs, subqueries, and complex joins
-- **Visual Lineage**: Shows data flow from tables through CTEs to final output
-- **Join Visualization**: Displays join types and join keys between tables
-- **CTE Grouping**: Groups nested CTEs visually like packages
-- **Color Coding**: Different colors for tables, CTEs, and subqueries
-- **Left-to-Right Layout**: Easy to follow data flow direction
-- **Multiple Output Formats**: SVG and PNG diagram generation
+- **Complex SQL Parsing**: Handles nested CTEs, subqueries, and complex joins using SQLGlot
+- **Visual Lineage**: Shows data flow from tables through CTEs to final output with left-to-right layout
+- **Join Visualization**: Displays join types, join keys, and cardinality estimates
+- **CTE Grouping**: Groups nested CTEs visually like packages with hierarchical clustering
+- **Color Coding**: Different colors for tables, CTEs, subqueries, and derived tables
+- **Multiple Modes**: Basic and advanced visualization modes
+- **Complexity Analysis**: Analyzes and reports query complexity metrics
+- **Multiple Output Formats**: SVG (scalable) and PNG (presentation-ready)
+- **CLI Interface**: User-friendly command-line interface with multiple options
+- **Multi-Dialect Support**: Works with PostgreSQL, MySQL, BigQuery, Snowflake, and more
 
-## Installation
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Install system dependency (Ubuntu/Debian)
+sudo apt-get install graphviz
 ```
 
-**System Requirements:**
-- Python 3.7+
-- Graphviz system package (`apt-get install graphviz` on Ubuntu/Debian)
-
-## Usage
-
-### Command Line Interface
+### Basic Usage
 
 ```bash
 # Parse from SQL file
-python sql_query_visualizer.py -f sample_queries.sql -o my_diagram
+python sql_query_visualizer.py -f your_query.sql -o diagram_name
 
 # Parse from SQL string
 python sql_query_visualizer.py -s "SELECT * FROM table1 JOIN table2 ON table1.id = table2.id" -o simple_diagram
+
+# Use advanced mode with detailed analysis
+python advanced_sql_visualizer.py -f complex_query.sql -o advanced_diagram -v
 
 # Specify SQL dialect
 python sql_query_visualizer.py -f query.sql -d postgres -o postgres_diagram
 ```
 
-### Options
+## 📊 What Gets Visualized
 
-- `-f, --sql-file`: Path to SQL file to parse
-- `-s, --sql`: SQL query string to parse
-- `-o, --output`: Output file name (without extension, defaults to 'query_diagram')
-- `-d, --dialect`: SQL dialect (postgres, mysql, bigquery, snowflake, etc.)
+### Node Types (Color-Coded)
+- **Tables** (Light Blue): Database tables with schema information
+- **CTEs** (Light Green): Common Table Expressions with hierarchy levels
+- **Subqueries** (Light Orange): Inline subqueries and derived tables  
+- **Views** (Light Lime): Database views (advanced mode)
 
-## Examples
+### Relationships (Edge Types)
+- **JOIN relationships** (Blue): Shows join types and join keys
+- **CTE dependencies** (Green): Data flow into CTEs
+- **Subquery dependencies** (Orange): Subquery data sources
+- **Data flow** (Gray): General data movement
 
-### Simple Query
+### Enhanced Information
+- Table/CTE names and aliases
+- Schema information where available
+- Key columns (first few displayed)
+- Join conditions and cardinality estimates
+- CTE hierarchy levels
+- Complexity metrics and analysis
+
+## 🏗️ Architecture
+
+### Core Components
+
+1. **SQLQueryParser**: Basic SQL parsing using SQLGlot
+2. **AdvancedSQLQueryParser**: Enhanced parsing with relationship analysis
+3. **DiagramGenerator**: Basic diagram generation with Graphviz
+4. **AdvancedDiagramGenerator**: Enhanced visualization with styling
+5. **CLI Interface**: Command-line interface with Click
+
+### Data Models
+
+- **QueryNode**: Represents tables, CTEs, and subqueries
+- **QueryEdge**: Represents relationships between nodes
+- **NodeType**: Enumeration of node types
+- **JoinType**: Enumeration of join types
+
+## 📋 Examples
+
+### Simple Query with CTE
 ```sql
 WITH customer_orders AS (
     SELECT customer_id, COUNT(*) as order_count
@@ -58,40 +96,60 @@ FROM customers c
 JOIN customer_orders co ON c.id = co.customer_id;
 ```
 
-### Complex Query with Nested CTEs
-See `sample_queries.sql` for a comprehensive example with:
-- Multiple CTE levels
-- Various join types
-- Subqueries
-- Complex relationships
+### Complex Nested CTEs
+```sql
+WITH customer_base AS (...),
+     order_metrics AS (...),
+     customer_segments AS (
+         SELECT om.customer_id, om.total_spent,
+                CASE WHEN om.total_spent > 1000 THEN 'Premium' 
+                     ELSE 'Standard' END as segment
+         FROM order_metrics om
+     )
+SELECT cs.*, regional_stats.avg_spend
+FROM customer_segments cs
+LEFT JOIN (...) regional_stats ON ...;
+```
 
-## Output
+## 🛠️ Available Tools
 
-The tool generates two files:
-- `{output_name}.svg` - Scalable vector graphics (recommended for web)
-- `{output_name}.png` - Portable network graphics (for presentations)
+### 1. Basic Visualizer (`sql_query_visualizer.py`)
+- Core SQL parsing and visualization
+- CTE hierarchy detection
+- Basic join analysis
+- Standard color coding
 
-## Diagram Legend
+### 2. Advanced Visualizer (`advanced_sql_visualizer.py`)
+- Enhanced SQL parsing with better error handling
+- Comprehensive relationship analysis
+- Cardinality estimation for joins
+- Complexity scoring and metrics
+- Enhanced styling and layout
+- Verbose mode for detailed analysis
 
-### Node Colors
-- **Light Blue**: Database tables
-- **Light Green**: Common Table Expressions (CTEs)
-- **Light Orange**: Subqueries
-- **Light Purple**: Derived tables
+### 3. Test Suite (`test_visualizer.py`)
+- Comprehensive test cases
+- Various SQL pattern demonstrations
+- Automated testing of different query types
 
-### Edge Colors
-- **Blue**: JOIN relationships
-- **Green**: CTE dependencies
-- **Gray**: Data flow
+### 4. Comprehensive Demo (`demo_comprehensive.py`)
+- Real-world example queries from different domains
+- E-commerce analytics, financial portfolio, healthcare
+- Complete feature demonstration
 
-### Node Information
-Each node displays:
-- Table/CTE name and alias
-- Schema (if applicable)
-- Node type
-- Key columns (first 3 shown)
+## 📈 Supported SQL Constructs
 
-## Supported SQL Dialects
+- ✅ SELECT statements with complex expressions
+- ✅ Common Table Expressions (CTEs) - including nested
+- ✅ All JOIN types (INNER, LEFT, RIGHT, FULL, CROSS)
+- ✅ Subqueries in SELECT, FROM, and WHERE clauses
+- ✅ Window functions and analytical queries
+- ✅ Complex WHERE conditions and join predicates
+- ✅ UNION and set operations
+- ✅ Aggregate functions and GROUP BY
+- ✅ Multiple schema and database references
+
+## 🗄️ Supported SQL Dialects
 
 The tool uses SQLGlot parser which supports:
 - PostgreSQL
@@ -100,39 +158,128 @@ The tool uses SQLGlot parser which supports:
 - Snowflake
 - Redshift
 - SQLite
+- Oracle
+- SQL Server
 - And many more...
 
-## Architecture
+## 🎨 Output Examples
 
-### Core Components
+The tool generates both SVG and PNG files:
 
-1. **SQLQueryParser**: Extracts query structure using SQLGlot
-2. **DiagramGenerator**: Creates visual representation using Graphviz
-3. **Data Models**: QueryNode and QueryEdge for representing structure
-4. **CLI Interface**: User-friendly command line interface
+- **SVG files**: Scalable vector graphics, perfect for web viewing and documentation
+- **PNG files**: Raster images, ideal for presentations and reports
 
-### Parsing Process
+### Sample Outputs Generated
+- `test1_simple_join.svg` - Basic two-table join
+- `test4_nested_ctes.svg` - Complex nested CTE structure  
+- `demo_advanced_ecommerce.svg` - Real-world e-commerce analytics
+- `demo_advanced_financial.svg` - Financial portfolio analysis
+- `demo_advanced_healthcare.svg` - Healthcare patient journey
 
-1. Parse SQL into AST using SQLGlot
-2. Extract CTEs, tables, and subqueries
-3. Analyze join relationships and dependencies
-4. Build graph structure with nodes and edges
-5. Generate visual diagram with proper layout
+## ⚙️ Command Line Options
 
-## Limitations
+### Basic Visualizer
+```bash
+python sql_query_visualizer.py [OPTIONS]
 
-- Complex nested queries may require manual parsing adjustments
-- Some proprietary SQL extensions may not be fully supported
-- Very large queries may produce cluttered diagrams
+Options:
+  -f, --sql-file PATH     Path to SQL file to parse
+  -s, --sql TEXT         SQL query string to parse  
+  -o, --output TEXT      Output file name (without extension)
+  -d, --dialect TEXT     SQL dialect (postgres, mysql, bigquery, etc.)
+  --help                 Show help message
+```
 
-## Contributing
+### Advanced Visualizer
+```bash
+python advanced_sql_visualizer.py [OPTIONS]
 
-Contributions welcome! Areas for improvement:
-- Enhanced join key extraction
-- Better layout algorithms for large queries
-- Support for more SQL constructs
+Options:
+  -f, --sql-file PATH     Path to SQL file to parse
+  -s, --sql TEXT         SQL query string to parse
+  -o, --output TEXT      Output file name (without extension)  
+  -d, --dialect TEXT     SQL dialect (postgres, mysql, bigquery, etc.)
+  -v, --verbose          Show detailed analysis and node information
+  --help                 Show help message
+```
+
+## 🧪 Testing
+
+Run the comprehensive test suite:
+
+```bash
+# Run all tests
+python test_visualizer.py
+
+# Run comprehensive demo
+python demo_comprehensive.py
+```
+
+## 🔧 Advanced Configuration
+
+### Customizing Visualization
+
+The advanced visualizer allows customization through:
+
+- **Color schemes**: Modify colors in `AdvancedDiagramGenerator`
+- **Layout options**: Adjust Graphviz attributes
+- **Node sizing**: Configure size estimates based on complexity
+- **Edge styling**: Customize relationship line styles
+
+### Error Handling
+
+The tool includes comprehensive error handling:
+- Graceful degradation when parsing fails
+- Warning messages for unsupported constructs
+- Continues processing even with partial failures
+- Detailed error reporting in verbose mode
+
+## 📝 Best Practices
+
+1. **Start Simple**: Test with simple queries before complex ones
+2. **Use Verbose Mode**: Enable `-v` for detailed analysis information
+3. **Check Outputs**: Always verify both SVG and PNG outputs
+4. **Dialect Specification**: Specify SQL dialect for better parsing accuracy
+5. **File Organization**: Use descriptive output names for multiple diagrams
+
+## 🤝 Contributing
+
+Areas for future enhancement:
 - Interactive diagram features
+- Better layout algorithms for very large queries
+- Support for more SQL constructs (MERGE, recursive CTEs)
+- Integration with SQL development tools
+- Web-based interface
+- Export to additional formats (PDF, DOT)
 
-## License
+## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## 🎯 Use Cases
+
+### Data Engineering
+- Understand complex ETL pipeline queries
+- Document data transformation workflows
+- Analyze query dependencies and lineage
+
+### Analytics & BI
+- Visualize analytical query structure
+- Document business logic in SQL
+- Understand data mart and warehouse queries
+
+### Database Development
+- Review complex stored procedures
+- Understand legacy query structures
+- Plan query optimizations
+
+### Education & Training
+- Teach SQL query structure and best practices
+- Demonstrate CTE and subquery relationships
+- Visual learning aid for complex SQL concepts
+
+---
+
+**Created with ❤️ for the SQL community**
+
+This tool aims to make complex SQL queries more understandable through visualization, helping developers, analysts, and data engineers better comprehend and document their SQL code.
