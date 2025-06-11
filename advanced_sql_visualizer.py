@@ -91,14 +91,36 @@ class AdvancedSQLQueryParser:
             self.query_complexity = {}
             
             # Phase 1: Extract all components
-            self._extract_ctes(parsed)
-            self._extract_main_query(parsed)
-            self._extract_subqueries(parsed)
+            try:
+                self._extract_ctes(parsed)
+            except Exception as e:
+                print(f"Warning: CTE extraction failed: {e}")
+            
+            try:
+                self._extract_main_query(parsed)
+            except Exception as e:
+                print(f"Warning: Main query extraction failed: {e}")
+            
+            try:
+                self._extract_subqueries(parsed)
+            except Exception as e:
+                print(f"Warning: Subquery extraction failed: {e}")
             
             # Phase 2: Build relationships and analyze
-            self._build_comprehensive_relationships(parsed)
-            self._analyze_query_complexity()
-            self._estimate_node_sizes()
+            try:
+                self._build_comprehensive_relationships(parsed)
+            except Exception as e:
+                print(f"Warning: Relationship building failed: {e}")
+            
+            try:
+                self._analyze_query_complexity()
+            except Exception as e:
+                print(f"Warning: Complexity analysis failed: {e}")
+            
+            try:
+                self._estimate_node_sizes()
+            except Exception as e:
+                print(f"Warning: Size estimation failed: {e}")
             
             return {
                 'nodes': self.nodes,
