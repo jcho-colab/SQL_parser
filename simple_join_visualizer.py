@@ -48,14 +48,24 @@ class SimpleJoinParser:
     
     def parse_query(self, sql: str) -> Dict[str, Any]:
         """Parse SQL focusing on join relationships"""
+        # Reset state
+        self.tables = {}
+        self.joins = []
+        self.table_aliases = {}
+        
         try:
-            # First, try with sqlglot
-            parsed = sqlglot.parse_one(sql, read='')
-            self._extract_with_sqlglot(parsed)
-        except Exception as e:
-            print(f"SQLGlot parsing failed: {e}")
-            # Fallback to regex parsing
+            # Try regex parsing first (more reliable for our use case)
             self._extract_with_regex(sql)
+        except Exception as e:
+            print(f"Regex parsing failed: {e}")
+        
+        # If no results, try SQLGlot as backup
+        if not self.tables and not self.joins:
+            try:
+                parsed = sqlglot.parse_one(sql, read='')
+                self._extract_with_sqlglot(parsed)
+            except Exception as e:
+                print(f"SQLGlot parsing also failed: {e}")
         
         return {
             'tables': self.tables,
