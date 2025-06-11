@@ -2,25 +2,18 @@
 
 A comprehensive Python tool to parse complex SQL queries and generate static diagrams showing lineage, relationships, and data flow. This tool helps you understand how complex SQL queries are structured, how tables are connected, and how data flows through CTEs and subqueries.
 
-## 🆕 Latest Enhancement: Improved Join Visualization ⭐
+## 🎯 Key Features
 
-### **What's New in Final Join Visualizer**
-- **Vertical Table Layout**: Tables now display information vertically for better readability
-- **Level-Based Arrangement**: Tables are automatically arranged left-to-right by their position in the join chain
-- **Enhanced Join Focus**: Shows ONLY join-relevant columns with 🔑 symbols
-- **Perfect Join Detection**: Accurately identifies all join types and conditions
-
-### **Visual Improvements**
-```
-Before: Horizontal record layout, unclear join relationships
-After:  Vertical table boxes, clear left-to-right data flow
-```
-
-### **Usage for Join Analysis**
-```bash
-# Best tool for understanding join relationships
-python final_join_visualizer.py -f your_query.sql -o join_analysis -v
-```
+- **Complex SQL Parsing**: Handles nested CTEs, subqueries, and complex joins using SQLGlot
+- **Visual Lineage**: Shows data flow from tables through CTEs to final output with left-to-right layout
+- **Join Visualization**: Displays join types, join keys, and cardinality estimates
+- **CTE Grouping**: Groups nested CTEs visually like packages with hierarchical clustering
+- **Color Coding**: Different colors for tables, CTEs, subqueries, and derived tables
+- **Multiple Modes**: Basic and advanced visualization modes
+- **Complexity Analysis**: Analyzes and reports query complexity metrics
+- **Multiple Output Formats**: SVG (scalable) and PNG (presentation-ready)
+- **CLI Interface**: User-friendly command-line interface with multiple options
+- **Multi-Dialect Support**: Works with PostgreSQL, MySQL, BigQuery, Snowflake, and more
 
 ## 🚀 Quick Start
 
