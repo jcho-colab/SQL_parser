@@ -125,25 +125,19 @@ class HierarchicalSQLParser:
         
         # For other node types, continue traversing
         element_ids = []
-        if hasattr(node, '__iter__'):
-            try:
-                for child in node:
-                    child_ids = self._analyze_query_hierarchy(child, level, parent_id)
-                    element_ids.extend(child_ids)
-            except:
-                pass
         
-        # Check common attributes
-        for attr_name in ['expressions', 'this', 'expression']:
-            if hasattr(node, attr_name):
-                attr_value = getattr(node, attr_name)
-                if attr_value:
-                    if isinstance(attr_value, list):
-                        for item in attr_value:
-                            child_ids = self._analyze_query_hierarchy(item, level, parent_id)
-                            element_ids.extend(child_ids)
-                    else:
-                        child_ids = self._analyze_query_hierarchy(attr_value, level, parent_id)
+        # Check if node has common SQL structure attributes
+        if hasattr(node, 'args') and hasattr(node.args, 'get'):
+            # This is a SQLGlot expression with arguments
+            for key, value in node.args.items():
+                if value is not None:
+                    if isinstance(value, list):
+                        for item in value:
+                            if hasattr(item, '__class__') and 'exp.' in str(item.__class__):
+                                child_ids = self._analyze_query_hierarchy(item, level, parent_id)
+                                element_ids.extend(child_ids)
+                    elif hasattr(value, '__class__') and 'exp.' in str(value.__class__):
+                        child_ids = self._analyze_query_hierarchy(value, level, parent_id)
                         element_ids.extend(child_ids)
         
         return element_ids
