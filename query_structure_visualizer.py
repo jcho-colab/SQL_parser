@@ -146,31 +146,66 @@ class QueryStructureParser:
         structures = []
         
         # Find WITH clause
-        with_match = re.search(r'WITH\s+(.+?)(?=\s+SELECT\s+)', sql, re.IGNORECASE | re.DOTALL)
+        with_match = re.search(r'WITH\s+(.+?)(?=\s+SELECT\s+.*?FROM)', sql, re.IGNORECASE | re.DOTALL)
         if not with_match:
             return structures
         
         with_content = with_match.group(1)
         
-        # Find individual CTEs
-        # Pattern: cte_name AS (...)
-        cte_pattern = r'(\w+)\s+AS\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)'
-        cte_matches = re.findall(cte_pattern, with_content, re.IGNORECASE | re.DOTALL)
+        # Split CTEs by comma (but not commas inside parentheses)
+        cte_parts = self._split_ctes(with_content)
         
-        for i, (cte_name, cte_content) in enumerate(cte_matches):
-            structure = QueryStructure(
-                id=f"cte_{i}",
-                structure_type=StructureType.CTE,
-                name=cte_name,
-                level=1,
-                nesting_depth=1,
-                tables=self._extract_tables_from_text(cte_content),
-                join_keys=self._extract_join_keys_from_text(cte_content),
-                sql_preview=f"{cte_name} AS ({cte_content[:50]}...)"
-            )
-            structures.append(structure)
+        for i, cte_part in enumerate(cte_parts):
+            # Extract CTE name and content
+            cte_match = re.match(r'\s*(\w+)\s+AS\s*\((.+)\)', cte_part.strip(), re.IGNORECASE | re.DOTALL)
+            if cte_match:
+                cte_name = cte_match.group(1)
+                cte_content = cte_match.group(2)
+                
+                structure = QueryStructure(
+                    id=f"cte_{i}",
+                    structure_type=StructureType.CTE,
+                    name=cte_name,
+                    level=1,
+                    nesting_depth=1,
+                    tables=self._extract_tables_from_text(cte_content),
+                    join_keys=self._extract_join_keys_from_text(cte_content),
+                    sql_preview=f"{cte_name} AS (SELECT ... FROM {', '.join(self._extract_tables_from_text(cte_content)[:2])})"
+                )
+                structures.append(structure)
         
         return structures
+    
+    def _split_ctes(self, with_content: str) -> List[str]:
+        """Split multiple CTEs while respecting parentheses"""
+        ctes = []
+        current_cte = ""
+        paren_depth = 0
+        
+        i = 0
+        while i < len(with_content):
+            char = with_content[i]
+            
+            if char == '(':
+                paren_depth += 1
+            elif char == ')':
+                paren_depth -= 1
+            elif char == ',' and paren_depth == 0:
+                # This comma is at the top level, so it separates CTEs
+                if current_cte.strip():
+                    ctes.append(current_cte.strip())
+                current_cte = ""
+                i += 1
+                continue
+            
+            current_cte += char
+            i += 1
+        
+        # Add the last CTE
+        if current_cte.strip():
+            ctes.append(current_cte.strip())
+        
+        return ctes
     
     def _identify_select_structures(self, sql: str) -> List[QueryStructure]:
         """Identify main SELECT statements"""
