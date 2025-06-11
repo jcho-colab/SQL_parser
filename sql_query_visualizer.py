@@ -310,6 +310,50 @@ class SQLQueryParser:
                                 dependencies.append(identifier_name)
         
         return list(set(dependencies))  # Remove duplicates
+    
+    def _extract_columns_from_query(self, query) -> List[str]:
+        """Extract column names from a query"""
+        columns = []
+        
+        if not hasattr(query, 'find_all'):
+            return columns
+            
+        # Find SELECT expressions
+        select_expressions = query.find_all(exp.Select)
+        for select_expr in select_expressions:
+            if hasattr(select_expr, 'expressions'):
+                for expr in select_expr.expressions:
+                    column_name = self._extract_column_name(expr)
+                    if column_name:
+                        columns.append(column_name)
+        
+        return list(set(columns))  # Remove duplicates
+    
+    def _extract_column_name(self, expression) -> Optional[str]:
+        """Extract column name from a select expression"""
+        # Handle aliased expressions
+        if hasattr(expression, 'alias') and expression.alias:
+            return str(expression.alias)
+        
+        # Handle simple column references
+        if hasattr(expression, 'name'):
+            return str(expression.name)
+        
+        # Handle function calls and complex expressions
+        if hasattr(expression, 'this'):
+            if hasattr(expression.this, 'name'):
+                return str(expression.this.name)
+        
+        # Handle star expressions
+        if str(expression) == '*':
+            return '*'
+        
+        # For complex expressions, try to extract a meaningful name
+        expr_str = str(expression)
+        if len(expr_str) < 50:  # Only show short expressions
+            return expr_str
+        
+        return None
 
 
 class DiagramGenerator:
