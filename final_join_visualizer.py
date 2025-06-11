@@ -115,29 +115,23 @@ class RobustJoinParser:
     
     def _split_join_clauses(self, sql: str) -> List[str]:
         """Split SQL into individual join clauses"""
-        print(f"DEBUG: Full SQL after cleaning: {sql}")  # Debug
-        
         # Find the FROM clause - just the FROM table part
         from_match = re.search(r'FROM\s+([\w\.]+(?:\s+(?:AS\s+)?\w+)?)', sql, re.IGNORECASE)
         if not from_match:
-            print("DEBUG: No FROM clause found")  # Debug
             return []
         
         # Get the part after the FROM table
         from_end = from_match.end()
         after_from = sql[from_end:].strip()
-        print(f"DEBUG: After FROM table: {after_from}")  # Debug
         
         # Now extract all JOIN clauses
         # Look for JOIN patterns and capture until the next JOIN or WHERE/GROUP/ORDER
         join_pattern = r'((?:INNER\s+|LEFT\s+(?:OUTER\s+)?|RIGHT\s+(?:OUTER\s+)?|FULL\s+(?:OUTER\s+)?|CROSS\s+)?JOIN\s+\w+(?:\s+(?:AS\s+)?\w+)?\s+ON\s+[^WHERE]+?)(?=\s*(?:INNER\s+|LEFT\s+|RIGHT\s+|FULL\s+|CROSS\s+)?JOIN|WHERE|GROUP\s+BY|ORDER\s+BY|HAVING|LIMIT|$)'
         
         join_matches = re.findall(join_pattern, after_from, re.IGNORECASE | re.DOTALL)
-        print(f"DEBUG: Found {len(join_matches)} join matches")  # Debug
         
         # If that doesn't work, try to split manually by JOIN keywords
         if not join_matches and 'JOIN' in after_from.upper():
-            print("DEBUG: Trying manual split...")  # Debug
             # Split on JOIN keywords and reconstruct
             parts = re.split(r'\s+((?:INNER\s+|LEFT\s+(?:OUTER\s+)?|RIGHT\s+(?:OUTER\s+)?|FULL\s+(?:OUTER\s+)?|CROSS\s+)?JOIN)', after_from, flags=re.IGNORECASE)
             
@@ -155,7 +149,6 @@ class RobustJoinParser:
                     join_clause = f"{join_type} {rest}".strip()
                     if 'ON' in join_clause:
                         join_matches.append(join_clause)
-                        print(f"DEBUG: Manual split found: {join_clause}")  # Debug
         
         return [match.strip() for match in join_matches if match.strip()]
     
