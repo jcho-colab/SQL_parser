@@ -248,7 +248,7 @@ class RobustJoinParser:
 
 
 class JoinFocusedVisualizer:
-    """Visualizer that emphasizes join relationships and columns"""
+    """Visualizer that emphasizes join relationships and columns with improved layout"""
     
     def __init__(self):
         self.join_colors = {
@@ -260,16 +260,20 @@ class JoinFocusedVisualizer:
         }
     
     def generate_diagram(self, data: Dict, output_path: str):
-        """Generate join-focused diagram"""
+        """Generate join-focused diagram with improved vertical layout"""
         tables = data['tables']
         joins = data['joins']
         summary = data['summary']
         
         dot = graphviz.Digraph(comment='SQL Join Analysis')
-        dot.attr(rankdir='LR')
-        dot.attr('node', shape='record', style='filled', fillcolor='lightblue', fontname='Arial')
+        dot.attr(rankdir='LR')  # Left to right
+        dot.attr('node', shape='box', style='filled', fillcolor='lightblue', fontname='Arial')
         dot.attr('edge', fontname='Arial', fontsize='10')
-        dot.attr('graph', splines='ortho', nodesep='0.8', ranksep='1.2')
+        dot.attr('graph', 
+                 splines='ortho', 
+                 nodesep='1.0', 
+                 ranksep='2.0',
+                 fontname='Arial')
         
         # Add title
         title = f'SQL Join Analysis\\n{summary["table_count"]} Tables, {summary["join_count"]} Joins'
@@ -279,10 +283,11 @@ class JoinFocusedVisualizer:
         
         dot.attr(label=title, labelloc='top', fontsize='14')
         
-        # Add nodes (tables) with join columns highlighted
-        for table_key, table in tables.items():
-            label = self._create_table_label(table)
-            dot.node(table_key, label=label)
+        # Calculate table levels for proper left-to-right arrangement
+        table_levels = self._calculate_table_levels(tables, joins)
+        
+        # Group tables by level and create ranked subgraphs
+        self._add_ranked_tables(dot, tables, table_levels)
         
         # Add edges (joins) with detailed information
         for join in joins:
@@ -296,30 +301,98 @@ class JoinFocusedVisualizer:
         except Exception as e:
             print(f"❌ Error generating diagram: {e}")
     
-    def _create_table_label(self, table: Table) -> str:
-        """Create table label emphasizing join columns"""
-        parts = []
+    def _calculate_table_levels(self, tables: Dict, joins: List) -> Dict[str, int]:
+        """Calculate the level of each table in the join hierarchy"""
+        levels = {}
         
-        # Table header
+        # Find the starting table (one that's not a target of any join)
+        targets = {join.right_table for join in joins}
+        sources = {join.left_table for join in joins}
+        
+        # Starting tables are sources but not targets
+        start_tables = sources - targets
+        if not start_tables:
+            # If no clear start, use the first table
+            start_tables = {list(tables.keys())[0]} if tables else set()
+        
+        # Assign level 0 to starting tables
+        for table in start_tables:
+            levels[table] = 0
+        
+        # Propagate levels through joins
+        assigned = set(start_tables)
+        remaining_joins = list(joins)
+        
+        while remaining_joins:
+            progress = False
+            for join in remaining_joins[:]:  # Copy to avoid modification issues
+                if join.left_table in levels and join.right_table not in levels:
+                    levels[join.right_table] = levels[join.left_table] + 1
+                    assigned.add(join.right_table)
+                    remaining_joins.remove(join)
+                    progress = True
+            
+            if not progress:
+                # Handle remaining tables without clear hierarchy
+                for join in remaining_joins:
+                    if join.left_table not in levels:
+                        levels[join.left_table] = 0
+                    if join.right_table not in levels:
+                        levels[join.right_table] = levels.get(join.left_table, 0) + 1
+                break
+        
+        # Assign level 0 to any tables not in joins
+        for table_name in tables:
+            if table_name not in levels:
+                levels[table_name] = 0
+        
+        return levels
+    
+    def _add_ranked_tables(self, dot, tables: Dict, table_levels: Dict[str, int]):
+        """Add tables grouped by level for proper left-to-right layout"""
+        # Group tables by level
+        levels_dict = {}
+        for table_name, level in table_levels.items():
+            if level not in levels_dict:
+                levels_dict[level] = []
+            levels_dict[level].append(table_name)
+        
+        # Create subgraphs for each level to enforce ranking
+        for level in sorted(levels_dict.keys()):
+            table_names = levels_dict[level]
+            
+            with dot.subgraph() as level_graph:
+                level_graph.attr(rank='same')  # Force same rank (vertical alignment)
+                
+                for table_name in table_names:
+                    if table_name in tables:
+                        table = tables[table_name]
+                        label = self._create_vertical_table_label(table)
+                        level_graph.node(table_name, label=label)
+    
+    def _create_vertical_table_label(self, table: Table) -> str:
+        """Create vertical table label emphasizing join columns"""
+        label_lines = []
+        
+        # Table header with styling
         if table.alias != table.name:
             header = f"{table.alias}\\n({table.name})"
         else:
             header = table.name
-        parts.append(f"<header>{header}")
+        
+        label_lines.append(f"📋 {header}")
+        label_lines.append("=" * 15)  # Separator line
         
         # Join columns section (most important)
         if table.join_columns:
-            join_section = "JOIN COLUMNS"
-            parts.append(join_section)
-            
+            label_lines.append("🔑 JOIN COLUMNS:")
             for col in table.join_columns:
-                parts.append(f"<{col}>🔑 {col}")
-        
-        # Format as record
-        if len(parts) == 1:
-            return parts[0]
+                label_lines.append(f"  • {col}")
         else:
-            return "{" + " | ".join(parts) + "}"
+            label_lines.append("ℹ️  No join columns")
+        
+        # Create the final label
+        return "\\n".join(label_lines)
     
     def _add_join_edge(self, dot, join: Join):
         """Add join edge with detailed information"""
