@@ -39,6 +39,9 @@ python sql_query_visualizer.py -s "SELECT * FROM table1 JOIN table2 ON table1.id
 # Use advanced mode with detailed analysis
 python advanced_sql_visualizer.py -f complex_query.sql -o advanced_diagram -v
 
+# NEW: Use join-focused mode for join analysis ⭐
+python final_join_visualizer.py -f query_with_joins.sql -o join_diagram -v
+
 # Specify SQL dialect
 python sql_query_visualizer.py -f query.sql -d postgres -o postgres_diagram
 ```
