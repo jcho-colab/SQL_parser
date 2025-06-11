@@ -1,0 +1,8 @@
+// Hierarchical SQL Query Structure
+digraph {
+	rankdir=LR
+	node [fontname=Arial shape=box style=filled]
+	edge [fontname=Arial fontsize=9]
+	graph [fontname=Arial nodesep=1.2 ranksep=2.0 splines=ortho]
+	fontsize=14 label="SQL Query Hierarchy\n0 Elements, 1 Levels" labelloc=top
+}
