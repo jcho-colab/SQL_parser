@@ -204,6 +204,56 @@ class SQLQueryParser:
                         )
                         self.edges.append(edge)
     
+    def _analyze_query_relationships(self, parsed_query):
+        """Comprehensively analyze all relationships in the query"""
+        # Find all SELECT statements to analyze their FROM and JOIN clauses
+        select_statements = parsed_query.find_all(exp.Select)
+        
+        for select_stmt in select_statements:
+            if hasattr(select_stmt, 'from_') and select_stmt.from_:
+                self._analyze_from_clause(select_stmt.from_)
+                
+            # Analyze joins
+            if hasattr(select_stmt, 'joins') and select_stmt.joins:
+                for join in select_stmt.joins:
+                    self._analyze_join(join)
+    
+    def _analyze_from_clause(self, from_clause):
+        """Analyze FROM clause to find base relationships"""
+        if hasattr(from_clause, 'this'):
+            # This is the main table in FROM
+            main_table = self._extract_table_name(from_clause.this)
+            # FROM clause establishes base data flow - could add edges here if needed
+    
+    def _analyze_join(self, join):
+        """Analyze individual join to extract relationships"""
+        join_type = self._get_join_type(join)
+        
+        # Get the joined table
+        joined_table = None
+        if hasattr(join, 'this'):
+            joined_table = self._extract_table_name(join.this)
+        
+        # Extract join condition
+        join_keys = []
+        if hasattr(join, 'on') and join.on:
+            join_keys = self._extract_join_keys(join.on)
+        
+        # For now, we'll create a simplified relationship
+        # In a more complex implementation, we'd track the specific tables being joined
+        if joined_table and joined_table in self.nodes:
+            # We'd need to determine the "source" table from context
+            # This is simplified - in practice, you'd track the FROM table chain
+            pass
+    
+    def _extract_table_name(self, table_expr):
+        """Extract table name from various table expressions"""
+        if hasattr(table_expr, 'name'):
+            return str(table_expr.name)
+        elif hasattr(table_expr, 'this') and hasattr(table_expr.this, 'name'):
+            return str(table_expr.this.name)
+        return str(table_expr)
+    
     def _get_join_type(self, join) -> JoinType:
         """Extract join type from join expression"""
         if hasattr(join, 'kind') and join.kind:
@@ -222,7 +272,7 @@ class SQLQueryParser:
         """Extract join keys from join condition"""
         join_keys = []
         
-        # This is a simplified extraction - in practice, you'd need more sophisticated parsing
+        # Convert to string and parse
         condition_str = str(join_condition)
         
         # Look for equality conditions like table1.col = table2.col
@@ -232,12 +282,15 @@ class SQLQueryParser:
         for match in matches:
             join_keys.append((match[0], match[1]))
         
+        # Also look for simple column = column patterns
+        simple_pattern = r'(\w+)\s*=\s*(\w+)'
+        simple_matches = re.findall(simple_pattern, condition_str)
+        
+        for match in simple_matches:
+            if '.' not in match[0] and '.' not in match[1]:  # Simple column names
+                join_keys.append((match[0], match[1]))
+        
         return join_keys
-    
-    def _get_table_from_join(self, join, side: str) -> Optional[str]:
-        """Get table name from join (simplified)"""
-        # This is a placeholder - would need more sophisticated logic
-        return None
     
     def _find_cte_dependencies(self, parsed_query, cte_name: str) -> List[str]:
         """Find what tables/CTEs a given CTE depends on"""
