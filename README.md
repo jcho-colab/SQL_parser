@@ -42,6 +42,9 @@ python advanced_sql_visualizer.py -f complex_query.sql -o advanced_diagram -v
 # NEW: Use join-focused mode for join analysis ⭐
 python final_join_visualizer.py -f query_with_joins.sql -o join_diagram -v
 
+# NEW: Analyze hierarchical query structure with nesting levels ⭐
+python query_structure_visualizer.py -f complex_query.sql -o structure_analysis -v
+
 # Specify SQL dialect
 python sql_query_visualizer.py -f query.sql -d postgres -o postgres_diagram
 ```
