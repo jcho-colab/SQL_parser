@@ -16,8 +16,8 @@
 <text text-anchor="middle" x="164.5" y="-67.8" font-family="Times,serif" font-size="14.00">customer_totals</text>
 <text text-anchor="middle" x="164.5" y="-52.8" font-family="Times,serif" font-size="14.00">Type: cte</text>
 <text text-anchor="middle" x="164.5" y="-37.8" font-family="Times,serif" font-size="14.00">Columns:</text>
-<text text-anchor="middle" x="164.5" y="-22.8" font-family="Times,serif" font-size="14.00">total_spent</text>
-<text text-anchor="middle" x="164.5" y="-7.8" font-family="Times,serif" font-size="14.00">customer_id</text>
+<text text-anchor="middle" x="164.5" y="-22.8" font-family="Times,serif" font-size="14.00">customer_id</text>
+<text text-anchor="middle" x="164.5" y="-7.8" font-family="Times,serif" font-size="14.00">total_spent</text>
 </g>
 <!-- high_value -->
 <g id="node2" class="node">
@@ -26,8 +26,8 @@
 <text text-anchor="middle" x="294" y="-67.8" font-family="Times,serif" font-size="14.00">high_value</text>
 <text text-anchor="middle" x="294" y="-52.8" font-family="Times,serif" font-size="14.00">Type: cte</text>
 <text text-anchor="middle" x="294" y="-37.8" font-family="Times,serif" font-size="14.00">Columns:</text>
-<text text-anchor="middle" x="294" y="-22.8" font-family="Times,serif" font-size="14.00">total_spent</text>
-<text text-anchor="middle" x="294" y="-7.8" font-family="Times,serif" font-size="14.00">customer_id</text>
+<text text-anchor="middle" x="294" y="-22.8" font-family="Times,serif" font-size="14.00">customer_id</text>
+<text text-anchor="middle" x="294" y="-7.8" font-family="Times,serif" font-size="14.00">total_spent</text>
 </g>
 <!-- customer_totals&#45;&gt;high_value -->
 <g id="edge2" class="edge">
@@ -42,9 +42,9 @@
 <text text-anchor="middle" x="436.5" y="-118.3" font-family="Times,serif" font-size="14.00">premium_customers</text>
 <text text-anchor="middle" x="436.5" y="-103.3" font-family="Times,serif" font-size="14.00">Type: cte</text>
 <text text-anchor="middle" x="436.5" y="-88.3" font-family="Times,serif" font-size="14.00">Columns:</text>
-<text text-anchor="middle" x="436.5" y="-73.3" font-family="Times,serif" font-size="14.00">total_spent</text>
+<text text-anchor="middle" x="436.5" y="-73.3" font-family="Times,serif" font-size="14.00">name</text>
 <text text-anchor="middle" x="436.5" y="-58.3" font-family="Times,serif" font-size="14.00">customer_id</text>
-<text text-anchor="middle" x="436.5" y="-43.3" font-family="Times,serif" font-size="14.00">name</text>
+<text text-anchor="middle" x="436.5" y="-43.3" font-family="Times,serif" font-size="14.00">total_spent</text>
 </g>
 <!-- high_value&#45;&gt;premium_customers -->
 <g id="edge4" class="edge">

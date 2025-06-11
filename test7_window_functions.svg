@@ -17,8 +17,8 @@
 <text text-anchor="middle" x="164" y="-82.8" font-family="Times,serif" font-size="14.00">Type: cte</text>
 <text text-anchor="middle" x="164" y="-67.8" font-family="Times,serif" font-size="14.00">Columns:</text>
 <text text-anchor="middle" x="164" y="-52.8" font-family="Times,serif" font-size="14.00">rank</text>
-<text text-anchor="middle" x="164" y="-37.8" font-family="Times,serif" font-size="14.00">order_id</text>
-<text text-anchor="middle" x="164" y="-22.8" font-family="Times,serif" font-size="14.00">prev_order</text>
+<text text-anchor="middle" x="164" y="-37.8" font-family="Times,serif" font-size="14.00">prev_order</text>
+<text text-anchor="middle" x="164" y="-22.8" font-family="Times,serif" font-size="14.00">order_id</text>
 <text text-anchor="middle" x="164" y="-7.8" font-family="Times,serif" font-size="14.00">... (+2 more)</text>
 </g>
 <!-- customers -->

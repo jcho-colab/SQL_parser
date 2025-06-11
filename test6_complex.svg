@@ -16,9 +16,9 @@
 <text text-anchor="middle" x="184.5" y="-82.8" font-family="Times,serif" font-size="14.00">monthly_sales</text>
 <text text-anchor="middle" x="184.5" y="-67.8" font-family="Times,serif" font-size="14.00">Type: cte</text>
 <text text-anchor="middle" x="184.5" y="-52.8" font-family="Times,serif" font-size="14.00">Columns:</text>
-<text text-anchor="middle" x="184.5" y="-37.8" font-family="Times,serif" font-size="14.00">customer_id</text>
+<text text-anchor="middle" x="184.5" y="-37.8" font-family="Times,serif" font-size="14.00">monthly_total</text>
 <text text-anchor="middle" x="184.5" y="-22.8" font-family="Times,serif" font-size="14.00">month</text>
-<text text-anchor="middle" x="184.5" y="-7.8" font-family="Times,serif" font-size="14.00">monthly_total</text>
+<text text-anchor="middle" x="184.5" y="-7.8" font-family="Times,serif" font-size="14.00">customer_id</text>
 </g>
 <!-- customer_segments -->
 <g id="node2" class="node">
@@ -27,8 +27,8 @@
 <text text-anchor="middle" x="330.5" y="-82.8" font-family="Times,serif" font-size="14.00">customer_segments</text>
 <text text-anchor="middle" x="330.5" y="-67.8" font-family="Times,serif" font-size="14.00">Type: cte</text>
 <text text-anchor="middle" x="330.5" y="-52.8" font-family="Times,serif" font-size="14.00">Columns:</text>
-<text text-anchor="middle" x="330.5" y="-37.8" font-family="Times,serif" font-size="14.00">customer_id</text>
-<text text-anchor="middle" x="330.5" y="-22.8" font-family="Times,serif" font-size="14.00">avg_monthly</text>
+<text text-anchor="middle" x="330.5" y="-37.8" font-family="Times,serif" font-size="14.00">avg_monthly</text>
+<text text-anchor="middle" x="330.5" y="-22.8" font-family="Times,serif" font-size="14.00">customer_id</text>
 <text text-anchor="middle" x="330.5" y="-7.8" font-family="Times,serif" font-size="14.00">segment</text>
 </g>
 <!-- monthly_sales&#45;&gt;customer_segments -->
