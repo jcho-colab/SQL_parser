@@ -279,15 +279,24 @@ class AdvancedSQLQueryParser:
     
     def _analyze_select_statement(self, select_stmt):
         """Analyze a single SELECT statement for relationships"""
-        # Get the main table from FROM clause
-        main_table = None
-        if hasattr(select_stmt, 'from_') and select_stmt.from_:
-            main_table = self._get_table_name_from_expression(select_stmt.from_.this)
-        
-        # Analyze JOINs
-        if hasattr(select_stmt, 'joins') and select_stmt.joins:
-            for join in select_stmt.joins:
-                self._analyze_join_comprehensive(join, main_table)
+        try:
+            # Get the main table from FROM clause
+            main_table = None
+            if hasattr(select_stmt, 'from_') and select_stmt.from_:
+                if hasattr(select_stmt.from_, 'this'):
+                    main_table = self._get_table_name_from_expression(select_stmt.from_.this)
+            
+            # Analyze JOINs
+            if hasattr(select_stmt, 'joins') and select_stmt.joins:
+                for join in select_stmt.joins:
+                    try:
+                        self._analyze_join_comprehensive(join, main_table)
+                    except Exception as e:
+                        # Skip problematic joins but continue processing
+                        continue
+        except Exception as e:
+            # Skip problematic statements but continue processing
+            pass
     
     def _analyze_join_comprehensive(self, join, main_table: Optional[str]):
         """Comprehensive join analysis"""
