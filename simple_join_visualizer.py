@@ -220,7 +220,7 @@ class SimpleJoinParser:
         sql = re.sub(r'--.*$', '', sql, flags=re.MULTILINE)  # Remove comments
         sql = re.sub(r'\s+', ' ', sql.strip())  # Normalize whitespace
         
-        print(f"Processing SQL: {sql[:100]}...")  # Debug
+        print(f"Processing SQL: {sql[:200]}...")  # Debug
         
         # Extract FROM clause with table and alias
         from_pattern = r'FROM\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?'
@@ -236,12 +236,26 @@ class SimpleJoinParser:
             if alias != table_name:
                 self.table_aliases[alias] = table_name
         
-        # Extract JOINs - improved pattern
-        join_pattern = r'(INNER\s+JOIN|LEFT\s+(?:OUTER\s+)?JOIN|RIGHT\s+(?:OUTER\s+)?JOIN|FULL\s+(?:OUTER\s+)?JOIN|CROSS\s+JOIN|JOIN)\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?\s+ON\s+([^WHERE|GROUP|ORDER|HAVING|INNER|LEFT|RIGHT|FULL|CROSS|JOIN]+)'
+        # Extract JOINs - improved pattern to handle multi-word join types and conditions
+        # This pattern captures join clauses more reliably
+        join_pattern = r'((?:INNER\s+)?(?:LEFT\s+(?:OUTER\s+)?|RIGHT\s+(?:OUTER\s+)?|FULL\s+(?:OUTER\s+)?|CROSS\s+)?JOIN)\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?\s+ON\s+([^WHERE]+?)(?=\s+(?:INNER\s+JOIN|LEFT\s+JOIN|RIGHT\s+JOIN|FULL\s+JOIN|CROSS\s+JOIN|JOIN|WHERE|GROUP\s+BY|ORDER\s+BY|HAVING|LIMIT|$))'
         
-        joins = re.findall(join_pattern, sql, re.IGNORECASE)
+        joins = re.findall(join_pattern, sql, re.IGNORECASE | re.DOTALL)
         
         print(f"Found {len(joins)} joins")  # Debug
+        
+        # If the main pattern doesn't work, try a simpler pattern
+        if not joins:
+            simple_pattern = r'(LEFT|RIGHT|INNER|FULL|CROSS)?\s*JOIN\s+([\w\.]+)(?:\s+AS\s+(\w+)|\s+(\w+))?\s+ON\s+([\w\.\s=]+)'
+            joins = re.findall(simple_pattern, sql, re.IGNORECASE)
+            print(f"Simple pattern found {len(joins)} joins")  # Debug
+            
+            # Reformat the results to match expected format
+            formatted_joins = []
+            for join_type, table_name, alias1, alias2, condition in joins:
+                join_type_full = f"{join_type} JOIN" if join_type else "INNER JOIN"
+                formatted_joins.append((join_type_full, table_name, alias1, alias2, condition))
+            joins = formatted_joins
         
         # Process joins in order
         table_order = [list(self.tables.keys())[0]] if self.tables else []
