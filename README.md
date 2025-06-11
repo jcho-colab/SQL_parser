@@ -219,6 +219,18 @@ Options:
   --help                 Show help message
 ```
 
+### Join-Focused Visualizer (NEW!) ⭐
+```bash
+python final_join_visualizer.py [OPTIONS]
+
+Options:
+  -f, --sql-file PATH     Path to SQL file to parse
+  -s, --sql TEXT         SQL query string to parse
+  -o, --output TEXT      Output file name (without extension)
+  -v, --verbose          Show detailed join analysis with column information
+  --help                 Show help message
+```
+
 ## 🧪 Testing
 
 Run the comprehensive test suite:
