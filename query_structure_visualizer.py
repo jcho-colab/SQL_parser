@@ -356,7 +356,66 @@ class StructureDiagramGenerator:
             dot.render(output_path, format='png', cleanup=True)
             print(f"✅ Structure diagram saved: {output_path}.svg and {output_path}.png")
         except Exception as e:
-            print(f"❌ Error generating diagram: {e}")
+            print(f"⚠️  Graphviz error: {e}")
+            print("📋 Generating text-based visualization instead:")
+            self._generate_text_visualization(data)
+    
+    def _generate_text_visualization(self, data: Dict[str, Any]):
+        """Generate text-based visualization when Graphviz fails"""
+        structures = data['structures']
+        level_groups = data['level_groups']
+        relations = data['relations']
+        
+        print("\n📊 QUERY STRUCTURE PROGRESSION (Left to Right):")
+        print("=" * 70)
+        
+        for level in sorted(level_groups.keys()):
+            print(f"\n📍 LEVEL {level}:")
+            print("-" * 50)
+            
+            for structure_id in level_groups[level]:
+                structure = structures[structure_id]
+                
+                # Structure header
+                type_icons = {
+                    StructureType.MAIN_QUERY: "🎯",
+                    StructureType.WITH_BLOCK: "📦", 
+                    StructureType.CTE: "🔄",
+                    StructureType.SUBQUERY: "📊"
+                }
+                icon = type_icons.get(structure.structure_type, "❓")
+                
+                print(f"  {icon} {structure.name}")
+                print(f"     Type: {structure.structure_type.value}")
+                
+                if structure.tables:
+                    print(f"     📋 Tables: {', '.join(structure.tables)}")
+                
+                if structure.join_keys:
+                    print(f"     🔗 Joins: {', '.join(structure.join_keys[:2])}")
+                    if len(structure.join_keys) > 2:
+                        print(f"             (+{len(structure.join_keys) - 2} more)")
+                
+                if structure.contains:
+                    print(f"     📁 Contains: {len(structure.contains)} nested elements")
+                
+                print(f"     💬 Preview: {structure.sql_preview[:60]}...")
+                print()
+        
+        # Show relationships
+        if relations:
+            print("🔗 STRUCTURE RELATIONSHIPS:")
+            print("-" * 30)
+            for relation in relations:
+                source = structures.get(relation.source_id, {})
+                target = structures.get(relation.target_id, {})
+                source_name = getattr(source, 'name', relation.source_id)
+                target_name = getattr(target, 'name', relation.target_id)
+                print(f"  {source_name} --{relation.relation_type}--> {target_name}")
+                if relation.details:
+                    print(f"    └─ {relation.details}")
+        
+        print("\n" + "=" * 70)
     
     def _add_structure_node(self, graph, structure: QueryStructure):
         """Add a node for a query structure"""
