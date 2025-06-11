@@ -122,16 +122,8 @@ class SQLQueryParser:
                         parent_cte=parent_cte
                     )
                     
-                    # Extract columns from CTE query
-                    if hasattr(cte_query, 'find_all'):
-                        select_exprs = cte_query.find_all(exp.Select)
-                        for select_expr in select_exprs:
-                            if hasattr(select_expr, 'expressions'):
-                                for expr in select_expr.expressions:
-                                    if hasattr(expr, 'alias'):
-                                        node.columns.append(expr.alias)
-                                    elif hasattr(expr, 'name'):
-                                        node.columns.append(expr.name)
+                    # Extract columns from CTE query more comprehensively
+                    node.columns = self._extract_columns_from_query(cte_query)
                     
                     self.nodes[cte_name] = node
                     
